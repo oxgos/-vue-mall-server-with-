@@ -10,77 +10,33 @@
 					<span class="sortby">Sort by:</span>
 					<a href="javascript:void(0)" class="default cur">Default</a>
 					<a href="javascript:void(0)" class="price">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
-					<a href="javascript:void(0)" class="filterby stopPop">Filter by</a>
+					<a href="javascript:void(0)" class="filterby stopPop" @click="showFilterPop">Filter by</a>
 				</div>
 				<div class="accessory-result">
 					<!-- filter -->
-					<div class="filter stopPop" id="filter">
+					<div class="filter stopPop" id="filter" :class="{'filterby-show' : filterBy}">
 						<dl class="filter-price">
 							<dt>Price:</dt>
-							<dd><a href="javascript:void(0)">All</a></dd>
 							<dd>
-								<a href="javascript:void(0)">0 - 100</a>
+								<a :class="{ 'cur' : priceChecked === 'All'}" href="javascript:void(0)" @click="setPriceFilter('All')">All</a>
 							</dd>
-							<dd>
-								<a href="javascript:void(0)">100 - 500</a>
-							</dd>
-							<dd>
-								<a href="javascript:void(0)">500 - 1000</a>
-							</dd>
-							<dd>
-								<a href="javascript:void(0)">1000 - 2000</a>
+							<dd v-for="(price, index) in priceRange" :key="index">
+								<a :class="{ 'cur': priceChecked === index }" href="javascript:void(0)"  @click="setPriceFilter(index)">{{ price.startPrice }} - {{ price.endPrice }}</a>
 							</dd>
 						</dl>
 					</div>
 
 					<!-- search result accessories list -->
 					<div class="accessory-list-wrap">
-
 						<div class="accessory-list col-4">
 							<ul>
-								<li>
+								<li v-for="product in goodsData" :key="product.productId">
 									<div class="pic">
-										<a href="#"><img src="static/1.jpg" alt=""></a>
+										<a href="#"><img v-lazy="'/static/' + product.productImg" alt=""></a>
 									</div>
 									<div class="main">
-										<div class="name">XX</div>
-										<div class="price">999</div>
-										<div class="btn-area">
-											<a href="javascript:;" class="btn btn--m">加入购物车</a>
-										</div>
-									</div>
-								</li>
-								<li>
-									<div class="pic">
-										<a href="#"><img src="static/2.jpg" alt=""></a>
-									</div>
-									<div class="main">
-										<div class="name">XX</div>
-										<div class="price">1000</div>
-										<div class="btn-area">
-											<a href="javascript:;" class="btn btn--m">加入购物车</a>
-										</div>
-									</div>
-								</li>
-								<li>
-									<div class="pic">
-										<a href="#"><img src="static/3.jpg" alt=""></a>
-									</div>
-									<div class="main">
-										<div class="name">XX</div>
-										<div class="price">500</div>
-										<div class="btn-area">
-											<a href="javascript:;" class="btn btn--m">加入购物车</a>
-										</div>
-									</div>
-								</li>
-								<li>
-									<div class="pic">
-										<a href="#"><img src="static/4.jpg" alt=""></a>
-									</div>
-									<div class="main">
-										<div class="name">XX</div>
-										<div class="price">2499</div>
+										<div class="name">{{ product.productName }}</div>
+										<div class="price">{{ product.prodcutPrice }}</div>
 										<div class="btn-area">
 											<a href="javascript:;" class="btn btn--m">加入购物车</a>
 										</div>
@@ -92,6 +48,7 @@
 				</div>
 			</div>
 		</div>
+		<div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
 		<nav-footer></nav-footer>
 	</div>
 </template>
@@ -104,13 +61,51 @@
 	export default {
 		data () {
 			return {
-				goodsData: ''
+				goodsData: '',
+				priceChecked: 'All',
+				priceRange: [
+					{
+						startPrice: '0.00',
+						endPrice: '500.00'
+					},
+					{
+						startPrice: '500.00',
+						endPrice: '1000.00'
+					},
+					{
+						startPrice: '1000.00',
+						endPrice: '1500.00'
+					},
+					{
+						startPrice: '1500.00',
+						endPrice: '2000.00'
+					}
+				],
+				filterBy: false,
+				overLayFlag: false
 			}
 		},
-		created () {
-			this.$ajax('/goods').then(res => {
-				this.goodsData = res.data
-			})
+		mounted () {
+			this.getGoodsList()
+		},
+		methods: {
+			getGoodsList () {
+				this.$ajax('api/goods').then((res) => {
+					this.goodsData = res.data.result
+				})
+			},
+			showFilterPop () {
+				this.filterBy = true
+				this.overLayFlag = true
+			},
+			setPriceFilter (index) {
+				this.priceChecked = index
+				this.closePop()
+			},
+			closePop () {
+				this.filterBy = false
+				this.overLayFlag = false
+			}
 		},
 		components: {
 			NavHeader,

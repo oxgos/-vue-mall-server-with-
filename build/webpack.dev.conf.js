@@ -13,6 +13,10 @@ const router = express.Router()
 const app = express()
 var data = require('./../mock/goods.json')
 
+router.get('/goods', (req, res) => {
+    res.json(data)
+})
+
 const devWebpackConfig = merge(baseWebpackConfig, {
     module: {
         rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true })
@@ -40,10 +44,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
             poll: config.dev.poll,
         },
         before(app) {
-            router.get('/goods', (req, res) => {
-                res.json(data)
-            })
-            app.use(router)
+            app.use('/api', router)
         }
     },
     plugins: [
