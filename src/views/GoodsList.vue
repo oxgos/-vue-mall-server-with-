@@ -22,7 +22,7 @@
 							</dd>
 							<dd v-for="(price, index) in priceRange" :key="index">
 								<a :class="{ 'cur': priceChecked === index }" href="javascript:void(0)"  @click="setPriceFilter(index)">{{ price.startPrice }} - {{ price.endPrice }}</a>
-							</dd>
+							</dd>                                                                                                                                                                                                                                                                                                                                                                              
 						</dl>
 					</div>
 
