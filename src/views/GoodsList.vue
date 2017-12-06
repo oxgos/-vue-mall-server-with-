@@ -32,7 +32,7 @@
 							<ul>
 								<li v-for="product in goodsData" :key="product.productId">
 									<div class="pic">
-										<a href="#"><img v-lazy="'/static/' + product.productImg" alt=""></a>
+										<a href="#"><img v-lazy="'/static/' + product.productImage" alt=""></a>
 									</div>
 									<div class="main">
 										<div class="name">{{ product.productName }}</div>
@@ -90,8 +90,8 @@
 		},
 		methods: {
 			getGoodsList () {
-				this.$ajax('api/goods').then((res) => {
-					this.goodsData = res.data.result
+				this.$ajax('/goods').then((res) => {
+					this.goodsData = res.data.result.list
 				})
 			},
 			showFilterPop () {

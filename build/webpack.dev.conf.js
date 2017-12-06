@@ -9,14 +9,14 @@ const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
 const path = require('path')
 
-const express = require('express')
+/* const express = require('express')
 const router = express.Router()
 const app = express()
 var data = require('./../mock/goods.json')
 
 router.get('/goods', (req, res) => {
     res.json(data)
-})
+}) */
 
 const devWebpackConfig = merge(baseWebpackConfig, {
     module: {
@@ -43,10 +43,10 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         quiet: true, // necessary for FriendlyErrorsPlugin
         watchOptions: {
             poll: config.dev.poll,
-        },
+        }/* ,
         before(app) {
             app.use('/api', router)
-        }
+        } */
     },
     plugins: [
         new webpack.DefinePlugin({
