@@ -6,10 +6,25 @@ var cookieParser = require('cookie-parser')
 var bodyParser = require('body-parser')
 
 var index = require('./routes/index')
-var users = require('./routes/users')
 var goods = require('./routes/goods')
 
 var app = express()
+
+var mongoose = require('mongoose')
+
+mongoose.Promise = global.Promise
+
+mongoose.connect('mongodb://127.0.0.1:27017/vuemall')
+
+mongoose.connection.on('connected', () => {
+    console.log('Mongodb connected success')
+})
+mongoose.connection.on('error', () => {
+    console.log('Mongodb connected failed')
+})
+mongoose.connection.on('disconnected', () => {
+    console.log('Mongodb connected disconnected')
+})
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
@@ -24,7 +39,6 @@ app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use('/', index)
-app.use('/users', users)
 app.use('/goods', goods)
 
 // catch 404 and forward to error handler
