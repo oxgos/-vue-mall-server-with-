@@ -9,7 +9,7 @@
 				<div class="filter-nav">
 					<span class="sortby">Sort by:</span>
 					<a href="javascript:void(0)" class="default cur">Default</a>
-					<a href="javascript:void(0)" class="price" @click="sortBy('price')">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
+					<a href="javascript:void(0)" class="price" :class="{'sort-up':sortFlag}" @click="sortBy">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
 					<a href="javascript:void(0)" class="filterby stopPop" @click="showFilterPop">Filter by</a>
 				</div>
 				<div class="accessory-result">
@@ -43,6 +43,9 @@
 									</div>
 								</li>
 							</ul>
+							<div v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="20" style="text-align: center;">
+								<img src="../assets/loading-spinning-bubbles.svg" alt="" v-show="loading">
+							</div>
 						</div>
 					</div>
 				</div>
@@ -61,11 +64,20 @@
 	export default {
 		data () {
 			return {
+				busy: false,
+				sortFlag: true,
+				page: 1,
+				pageSize: 8,
+				loading: false,
 				goodsData: '',
 				priceChecked: 'All',
 				priceRange: [
 					{
 						startPrice: '0.00',
+						endPrice: '100.00'
+					},
+					{
+						startPrice: '100.00',
 						endPrice: '500.00'
 					},
 					{
@@ -74,11 +86,7 @@
 					},
 					{
 						startPrice: '1000.00',
-						endPrice: '1500.00'
-					},
-					{
-						startPrice: '1500.00',
-						endPrice: '2000.00'
+						endPrice: '5000.00'
 					}
 				],
 				filterBy: false,
@@ -89,20 +97,49 @@
 			this.getGoodsList()
 		},
 		methods: {
-			sortBy (val) {
-				console.log(1)
+			// 封装获取数据请求方法
+			getGoodsList (flag) {
+				let param = {
+					page: this.page,
+					pageSize: this.pageSize,
+					sort: this.sortFlag ? 1 : -1,
+					priceLevel: this.priceChecked
+				}
+				// 未获取数据后，显示loading图标
+				this.loading = true
+
+				// ajax请求/goods接口
 				this.$ajax('/goods', {
-					params: {
-						priceSort: val
-					}
+					params: param
 				}).then((res) => {
-					this.goodsData = res.data.result.list
+					// 已获取数据后，隐藏loading图标
+					this.loading = false
+					if (res.data.status === '0') {
+						if (flag) {
+							this.goodsData.push(...res.data.result.list)
+							if (res.data.result.count < this.pageSize) {
+								this.busy = true
+							} else {
+								this.busy = false
+							}
+						} else {
+							this.goodsData = res.data.result.list
+							this.busy = false
+						}
+					}
 				})
 			},
-			getGoodsList () {
-				this.$ajax('/goods').then((res) => {
-					this.goodsData = res.data.result.list
-				})
+			loadMore () {
+				this.busy = true
+				setTimeout(() => {
+					this.page++
+					this.getGoodsList(true)
+				}, 1000)
+			},
+			sortBy () {
+				this.sortFlag = !this.sortFlag
+				this.page = 1
+				this.getGoodsList()
 			},
 			showFilterPop () {
 				this.filterBy = true
@@ -110,6 +147,8 @@
 			},
 			setPriceFilter (index) {
 				this.priceChecked = index
+				this.page = 1
+				this.getGoodsList()
 				this.closePop()
 			},
 			closePop () {

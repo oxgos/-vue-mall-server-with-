@@ -3,8 +3,11 @@ import App from './App'
 import router from './router'
 import axios from 'axios'
 import VueLazyload from 'vue-lazyload'
+import infiniteScroll from 'vue-infinite-scroll'
 
 import './assets/css/base.css'
+
+Vue.use(infiniteScroll)
 
 Vue.use(VueLazyload, {
     preLoad: 1.3,
