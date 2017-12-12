@@ -38,7 +38,7 @@
 										<div class="name">{{ product.productName }}</div>
 										<div class="price">{{ product.salePrice }}</div>
 										<div class="btn-area">
-											<a href="javascript:;" class="btn btn--m">加入购物车</a>
+											<a href="javascript:;" class="btn btn--m" @click="addCart(product.productId)">加入购物车</a>
 										</div>
 									</div>
 								</li>
@@ -127,6 +127,13 @@
 							this.busy = false
 						}
 					}
+				})
+			},
+			addCart (id) {
+				this.$ajax.post('/goods/addCart', {
+					productId: id
+				}).then((res) => {
+					console.log(res)
 				})
 			},
 			loadMore () {

@@ -1,7 +1,9 @@
 var express = require('express')
 var router = express.Router()
 var goodsModel = require('../models/goods')
+var usersModel = require('../models/users')
 
+// 首页产品数据
 router.get('/', (req, res) => {
     // 限定每页的个数
     let pageSize = parseInt(req.query.pageSize, 10)
@@ -83,6 +85,70 @@ router.get('/', (req, res) => {
                 })
             }
         })
+})
+
+// 购物车数据
+router.post('/addCart', (req, res, next) => {
+    let userId = '100000077'
+    let productId = req.body.productId
+
+    usersModel.findOne({userId: userId}, (err1, user) => {
+        if (err1) {
+            res.json({
+                status: '1',
+                msg: err1.message
+            })
+        } else {
+            let goodsItem = ''
+            user.cartList.forEach(element => {
+                if (element.productId === productId) {
+                    goodsItem = element
+                    element.productNum ++
+                }
+            })
+            if (goodsItem) {
+                user.save((err2, doc) => {
+                    if (err2) {
+                        res.json({
+                            status: '1',
+                            msg: err2.message
+                        })
+                    } else {
+                        res.json({
+                            status: '0',
+                            msg: 'add exist product: ' + doc
+                        })
+                    }
+                })
+            } else {
+                goodsModel.findOne({productId: productId}, (err3, product) => {
+                    if (err3) {
+                        res.json({
+                            status: '1',
+                            msg: err3.message
+                        })
+                    } else {
+                        product._doc.productNum = 1
+                        product._doc.checked = 1
+                        user.cartList.push(product)
+                        user.save((err4, user) => {
+                            if (err4) {
+                                res.json({
+                                    status: '1',
+                                    msg: err4.message
+                                })
+                            } else {
+                                res.json({
+                                    status: '0',
+                                    msg: 'add not exist product: ' + user
+                                })
+                            }
+                        })
+                    }
+                })
+            }
+        }
+    })
 })
 
 module.exports = router
