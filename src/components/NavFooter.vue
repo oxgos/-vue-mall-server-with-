@@ -30,11 +30,18 @@
 </template>
 
 <script type="text/ecmascript-6">
-   export default {
-       data () {
-           return {
+    import Bus from './bus.js'
+    export default {
+        data () {
+            return {
 
-           }
-       }
-   }
+            }
+        },
+        mounted () {
+            // 尝试兄弟组件NavHeader数据传递
+            Bus.$on('selfDefine', (data) => {
+               console.log(data)
+            })
+        }
+    }
 </script>

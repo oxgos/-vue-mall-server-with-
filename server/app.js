@@ -39,6 +39,23 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
+app.use((req, res, next) => {
+    if (req.cookies.userId) {
+        next()
+    } else {
+        if (req.originalUrl === '/users/logout' || req.originalUrl === '/users/login' || req.originalUrl.indexOf('/goods/list') > -1) {
+            next()
+        } else {
+            res.json({
+                status: '10001',
+                msg: '请先登陆',
+                result: ''
+            })
+        }
+    }
+})
+
+// 一级路由
 app.use('/', index)
 app.use('/goods', goods)
 app.use('/users', users)

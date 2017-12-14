@@ -109,7 +109,7 @@
 				this.loading = true
 
 				// ajax请求/goods接口
-				this.$ajax('/goods', {
+				this.$ajax('/goods/list', {
 					params: param
 				}).then((res) => {
 					// 已获取数据后，隐藏loading图标
@@ -132,8 +132,13 @@
 			addCart (id) {
 				this.$ajax.post('/goods/addCart', {
 					productId: id
-				}).then((res) => {
-					console.log(res)
+				}).then((response) => {
+					let res = response.data
+					if (res.status === '10001') {
+						alert(res.msg)
+					} else {
+						alert('加入购物车成功')
+					}
 				})
 			},
 			loadMore () {

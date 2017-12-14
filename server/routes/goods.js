@@ -4,7 +4,7 @@ var goodsModel = require('../models/goods')
 var usersModel = require('../models/users')
 
 // 首页产品数据
-router.get('/', (req, res) => {
+router.get('/list', (req, res) => {
     // 限定每页的个数
     let pageSize = parseInt(req.query.pageSize, 10)
 
