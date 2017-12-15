@@ -7,7 +7,7 @@ router.post('/signup', (req, res) => {
     let username = req.body.username
     let userPwd = req.body.pwd
 
-    User.findOne({userName: username}, (err, doc) => {
+    User.findOne({ userName: username }, (err, doc) => {
         if (err) {
             res.json({
                 status: '0',
@@ -60,10 +60,10 @@ router.post('/login', (req, res) => {
                     maxAge: 1000 * 60 * 60
                 })
                 res.cookie('userName', user.userName, {
-                    path: '/',
-                    maxAge: 1000 * 60 * 60
-                })
-                // req.session.user = user
+                        path: '/',
+                        maxAge: 1000 * 60 * 60
+                    })
+                    // req.session.user = user
                 res.json({
                     status: '0',
                     msg: '',
@@ -104,6 +104,68 @@ router.get('/checklogin', (req, res) => {
             result: ''
         })
     }
+})
+
+// 用户购物车列表
+router.get('/cartList', (req, res) => {
+    let userId = req.cookies.userId
+    User.findOne({ userId: userId }, (err, doc) => {
+        if (err) {
+            res.json({
+                status: '1',
+                msg: err.message,
+                result: ''
+            })
+        } else {
+            if (doc) {
+                res.json({
+                    status: '0',
+                    msg: 'success',
+                    result: doc.cartList
+                })
+            }
+        }
+    })
+})
+
+// 删除购物车商品
+router.delete('/removePro', (req, res) => {
+    let userId = req.cookies.userId
+    let productId = req.query.productId
+    User.findOne({ userId: userId }, (err, doc) => {
+        if (err) {
+            res.json({
+                status: '1',
+                msg: err.message,
+                result: ''
+            })
+        } else {
+            if (doc) {
+                var current
+                doc.cartList.forEach((item, index) => {
+                    if (item.productId === productId) {
+                        current = index
+                    }
+                })
+                doc.carList = doc.cartList.splice(current, 1)
+                doc.save((err, doc) => {
+                    if (err) {
+                        res.json({
+                            status: '1',
+                            msg: err.message,
+                            result: ''
+                        })
+                    } else {
+                        res.json({
+                            status: '10002',
+                            msg: 'delete done',
+                            result: ''
+                        })
+                    }
+                })
+            }
+        }
+    })
 })
 
 module.exports = router
