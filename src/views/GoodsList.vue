@@ -43,7 +43,7 @@
 									</div>
 								</li>
 							</ul>
-							<div v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="20" style="text-align: center;">
+							<div v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="50" style="text-align: center;">
 								<img src="../assets/loading-spinning-bubbles.svg" alt="" v-show="loading">
 							</div>
 						</div>
@@ -52,6 +52,26 @@
 			</div>
 		</div>
 		<div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
+		<modal :modalFlag="failFlag" @changeFlag="closeModal">
+			<p slot="message">
+				请先登录,否则无法加入到购物车中!
+			</p>
+			<div slot="btnGroup">
+				<a href="javascript: void(0);" class="btn btn--m" @click="failFlag = false" >关 闭</a>
+			</div>
+		</modal>
+		<modal :modalFlag="successFlag" @changeFlag="closeModal">
+			<p slot="message">
+				<svg class="icon-status-ok">
+					<use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-status-ok"></use>
+				</svg>
+				<span>加入购物车成!</span>
+			</p>
+			<div slot="btnGroup">
+				<a class="btn btn--m" href="javascript:;" @click="successFlag = false">继续购物</a>
+				<router-link class="btn btn--m btn--red" href="javascript:;" to="/cart">查看购物车</router-link>
+			</div>
+		</modal>
 		<nav-footer></nav-footer>
 	</div>
 </template>
@@ -60,7 +80,7 @@
 	import NavHeader from '@/components/NavHeader'
 	import NavBread from '@/components/NavBread'
 	import NavFooter from '@/components/NavFooter'
-
+	import Modal from '@/components/commonModal'
 	export default {
 		data () {
 			return {
@@ -71,6 +91,8 @@
 				loading: false,
 				goodsData: '',
 				priceChecked: 'All',
+				failFlag: false,
+				successFlag: false,
 				priceRange: [
 					{
 						startPrice: '0.00',
@@ -135,9 +157,9 @@
 				}).then((response) => {
 					let res = response.data
 					if (res.status === '10001') {
-						alert(res.msg)
+						this.failFlag = true
 					} else {
-						alert('加入购物车成功')
+						this.successFlag = true
 					}
 				})
 			},
@@ -166,12 +188,17 @@
 			closePop () {
 				this.filterBy = false
 				this.overLayFlag = false
+			},
+			closeModal () {
+				this.failFlag = false
+				this.successFlag = false
 			}
 		},
 		components: {
 			NavHeader,
 			NavBread,
-			NavFooter
+			NavFooter,
+			Modal
 		}
 	}
 </script>

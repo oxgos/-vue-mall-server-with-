@@ -4,7 +4,7 @@
           <div class="md-modal-inner">
             <div class="md-top">
               <div class="md-title">Login in</div>
-              <button class="md-close" @click="myLoginModalFlag = false">Close</button>
+              <button class="md-close" @click="changeModalFlag">Close</button>
             </div>
             <div class="md-content">
               <div class="confirm-tips">
@@ -28,7 +28,7 @@
             </div>
           </div>
         </div>
-        <div class="md-overlay" v-if="loginModalFlag" @click="myLoginModalFlag = false"></div>
+        <div class="md-overlay" v-if="loginModalFlag" @click="changeModalFlag"></div>
    </div>
 </template>
 
@@ -39,21 +39,12 @@
                 userName: '',
                 userPwd: '',
                 errorTip: false,
-                nickName: '',
-                myLoginModalFlag: this.loginModalFlag
+                nickName: ''
             }
        },
        props: {
          loginModalFlag: {
            type: Boolean
-         }
-       },
-       watch: {
-         loginModalFlag (val) {
-           this.myLoginModalFlag = val
-         },
-         myLoginModalFlag (val) {
-            this.$emit('getFlag', val)
          }
        },
        methods: {
@@ -69,13 +60,16 @@
                     let res = response.data
                     if (res.status === '0') {
                         this.errorTip = false
-                        this.myLoginModalFlag = false
                         this.nickName = res.result.userName
+                        this.$emit('changeFlag')
                         this.$emit('getUserName', this.nickName)
                     } else {
                         this.errorTip = true
                     }
                 })
+            },
+            changeModalFlag () {
+              this.$emit('changeFlag')
             }
         }
    }

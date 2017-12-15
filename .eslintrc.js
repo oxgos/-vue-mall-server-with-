@@ -26,6 +26,11 @@ module.exports = {
         'indent': 0,
         'eol-last': 0,
         'no-tabs': 0,
-        'no-unreachable': 0
+        'no-unreachable': 0,
+        'no-unused-vars': 0
+    },
+    globals: { 
+        '$': false,
+        'jquery': false
     }
 }

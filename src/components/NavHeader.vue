@@ -43,13 +43,13 @@
                 </div>
             </div>
         </div>
-        <modal @getUserName="login" @getFlag="getLoginFlag" ref="modal" :loginModalFlag="loginModalFlag"></modal>
+        <modal @getUserName="login" @changeFlag="changeLoginModalFlag" :loginModalFlag="loginModalFlag"></modal>
     </header>
 </template>
 
 <script type="text/ecmascript-6">
     import Bus from './bus.js'
-    import Modal from '@/components/Modal'
+    import Modal from '@/components/HeaderModal'
     export default {
         data () {
             return {
@@ -76,8 +76,8 @@
                     }
                 })
             },
-            getLoginFlag (data) {
-                this.loginModalFlag = data
+            changeLoginModalFlag () {
+                this.loginModalFlag = false
             },
             // 尝试兄弟组件尝试兄弟组件NavFooter数据传递数据传递
             test () {
