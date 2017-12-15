@@ -157,7 +157,7 @@
 				this.$ajax.delete('/users/removePro', { params: {
 					productId: id
 				} }).then((res) => {
-					if (res.data.status === '10002') {
+					if (res.data.status === '0') {
 						alert('delete success')
 						this.init()
 					}

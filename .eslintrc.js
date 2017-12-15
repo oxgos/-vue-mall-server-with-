@@ -28,9 +28,5 @@ module.exports = {
         'no-tabs': 0,
         'no-unreachable': 0,
         'no-unused-vars': 0
-    },
-    globals: { 
-        '$': false,
-        'jquery': false
     }
 }

@@ -132,7 +132,30 @@ router.get('/cartList', (req, res) => {
 router.delete('/removePro', (req, res) => {
     let userId = req.cookies.userId
     let productId = req.query.productId
-    User.findOne({ userId: userId }, (err, doc) => {
+    // 利用update的$pull进行删除
+    User.update({ userId: userId }, {
+        $pull: {
+            cartList: {
+                productId: productId
+            }
+        }
+    }, (err, doc) => {
+        if (err) {
+            res.json({
+                status: '1',
+                msg: err.message,
+                result: ''
+            })
+        } else {
+            res.json({
+                status: '0',
+                msg: 'delete success',
+                result: ''
+            })
+        }
+    })
+    // 原始方法遍历查找删除
+    /* User.findOne({ userId: userId }, (err, doc) => {
         if (err) {
             res.json({
                 status: '1',
@@ -157,7 +180,7 @@ router.delete('/removePro', (req, res) => {
                         })
                     } else {
                         res.json({
-                            status: '10002',
+                            status: '0',
                             msg: 'delete done',
                             result: ''
                         })
@@ -165,7 +188,7 @@ router.delete('/removePro', (req, res) => {
                 })
             }
         }
-    })
+    }) */
 })
 
 module.exports = router

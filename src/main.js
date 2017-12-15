@@ -4,9 +4,7 @@ import router from './router'
 import axios from 'axios'
 import VueLazyload from 'vue-lazyload'
 import infiniteScroll from 'vue-infinite-scroll'
-import $ from 'jquery'
 import './assets/css/base.css'
-import './assets/js/jquery.slimscroll.min.js'
 
 Vue.use(infiniteScroll)
 
