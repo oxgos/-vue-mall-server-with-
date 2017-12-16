@@ -65,7 +65,7 @@
 				<svg class="icon-status-ok">
 					<use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icon-status-ok"></use>
 				</svg>
-				<span>加入购物车成!</span>
+				<span>加入购物车成功!</span>
 			</p>
 			<div slot="btnGroup">
 				<a class="btn btn--m" href="javascript:;" @click="successFlag = false">继续购物</a>

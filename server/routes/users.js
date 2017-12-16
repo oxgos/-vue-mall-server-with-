@@ -109,7 +109,7 @@ router.get('/checklogin', (req, res) => {
 // 用户购物车列表
 router.get('/cartList', (req, res) => {
     let userId = req.cookies.userId
-    User.findOne({ userId: userId }, (err, doc) => {
+    User.findOne({ 'userId': userId }, (err, doc) => {
         if (err) {
             res.json({
                 status: '1',
@@ -128,16 +128,54 @@ router.get('/cartList', (req, res) => {
     })
 })
 
-// 删除购物车商品
-router.delete('/removePro', (req, res) => {
+// 商品全选
+router.post('/selectAll', (req, res) => {
     let userId = req.cookies.userId
-    let productId = req.query.productId
-    // 利用update的$pull进行删除
-    User.update({ userId: userId }, {
-        $pull: {
-            cartList: {
-                productId: productId
+    let checked = req.body.checked
+    User.findOne({ 'userId': userId }, (err, user) => {
+        if (err) {
+            res.json({
+                status: '1',
+                msg: err.message,
+                result: ''
+            })
+        } else {
+            if (user) {
+                user.cartList.forEach((item) => {
+                    item.checked = checked
+                })
+                user.save((err1, doc) => {
+                    if (err1) {
+                        res.json({
+                            status: '1',
+                            msg: err1.message,
+                            result: ''
+                        })
+                    } else {
+                        if (doc) {
+                            res.json({
+                                status: '0',
+                                msg: '',
+                                result: 'success'
+                            })
+                        }
+                    }
+                })
             }
+        }
+    })
+})
+
+// 修改商品信息
+router.post('/editPro', (req, res) => {
+    let userId = req.cookies.userId
+    let productId = req.body.productId
+    let productNum = req.body.productNum
+    let checked = req.body.checked
+    User.update({ 'userId': userId, 'cartList.productId': productId }, {
+        $set: {
+            'cartList.$.productNum': productNum,
+            'cartList.$.checked': checked
         }
     }, (err, doc) => {
         if (err) {
@@ -147,48 +185,78 @@ router.delete('/removePro', (req, res) => {
                 result: ''
             })
         } else {
-            res.json({
-                status: '0',
-                msg: 'delete success',
-                result: ''
-            })
-        }
-    })
-    // 原始方法遍历查找删除
-    /* User.findOne({ userId: userId }, (err, doc) => {
-        if (err) {
-            res.json({
-                status: '1',
-                msg: err.message,
-                result: ''
-            })
-        } else {
             if (doc) {
-                var current
-                doc.cartList.forEach((item, index) => {
-                    if (item.productId === productId) {
-                        current = index
-                    }
-                })
-                doc.carList = doc.cartList.splice(current, 1)
-                doc.save((err, doc) => {
-                    if (err) {
-                        res.json({
-                            status: '1',
-                            msg: err.message,
-                            result: ''
-                        })
-                    } else {
-                        res.json({
-                            status: '0',
-                            msg: 'delete done',
-                            result: ''
-                        })
-                    }
+                res.json({
+                    status: '0',
+                    msg: '',
+                    result: 'ok'
                 })
             }
         }
-    }) */
+    })
+})
+
+// 删除购物车商品
+router.delete('/removePro', (req, res) => {
+    let userId = req.cookies.userId
+    let productId = req.query.productId
+        // 利用update的$pull进行删除
+    User.update({ 'userId': userId }, {
+            $pull: {
+                cartList: {
+                    productId: productId
+                }
+            }
+        }, (err, doc) => {
+            if (err) {
+                res.json({
+                    status: '1',
+                    msg: err.message,
+                    result: ''
+                })
+            } else {
+                res.json({
+                    status: '0',
+                    msg: 'delete success',
+                    result: ''
+                })
+            }
+        })
+        // 原始方法遍历查找删除
+        /* User.findOne({ userId: userId }, (err, doc) => {
+            if (err) {
+                res.json({
+                    status: '1',
+                    msg: err.message,
+                    result: ''
+                })
+            } else {
+                if (doc) {
+                    var current
+                    doc.cartList.forEach((item, index) => {
+                        if (item.productId === productId) {
+                            current = index
+                        }
+                    })
+                    doc.carList = doc.cartList.splice(current, 1)
+                    doc.save((err, doc) => {
+                        if (err) {
+                            res.json({
+                                status: '1',
+                                msg: err.message,
+                                result: ''
+                            })
+                        } else {
+                            res.json({
+                                status: '0',
+                                msg: 'delete done',
+                                result: ''
+                            })
+                        }
+                    })
+                }
+            }
+        }) */
 })
 
 module.exports = router

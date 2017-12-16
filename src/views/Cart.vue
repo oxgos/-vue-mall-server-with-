@@ -63,7 +63,7 @@
               <li v-for="(item, index) in cartList" :key="index">
                 <div class="cart-tab-1">
                   <div class="cart-item-check">
-                    <a href="javascipt:;" class="checkbox-btn item-check-btn">
+                    <a href="javascipt:;" class="checkbox-btn item-check-btn" :class="{'check':item.checked === 1}" @click="editPro(item)">
                       <svg class="icon icon-ok">
                         <use xlink:href="#icon-ok"></use>
                       </svg>
@@ -83,9 +83,9 @@
                   <div class="item-quantity">
                     <div class="select-self select-self-open">
                       <div class="select-self-area">
-                        <a class="input-sub">-</a>
+                        <a class="input-sub" href="javascript: void(0);" @click="editPro(item, 'suc')">-</a>
                         <span class="select-ipt">{{ item.productNum }}</span>
-                        <a class="input-add">+</a>
+                        <a class="input-add" href="javascript: void(0);" @click="editPro(item,'add')">+</a>
                       </div>
                     </div>
                   </div>
@@ -95,7 +95,7 @@
                 </div>
                 <div class="cart-tab-5">
                   <div class="cart-item-opration">
-                    <a class="item-edit-btn" href="javascript: void(0);" @click="removePro(item.productId)">
+                    <a class="item-edit-btn" href="javascript: void(0);" @click="delProduct(item.productId)">
                       <svg class="icon icon-del">
                         <use xlink:href="#icon-del"></use>
                       </svg>
@@ -110,8 +110,8 @@
           <div class="cart-foot-inner">
             <div class="cart-foot-l">
               <div class="item-all-check">
-                <a href="javascipt:;">
-                  <span class="checkbox-btn item-check-btn">
+                <a href="javascipt: void(0);" @click="selectAll">
+                  <span class="checkbox-btn item-check-btn" :class="{check: selectAllFlag}">
                       <svg class="icon icon-ok"><use xlink:href="#icon-ok"/></svg>
                   </span>
                   <span>Select all</span>
@@ -131,6 +131,15 @@
       </div>
     </div>
 	<nav-footer></nav-footer>
+  <modal v-if="delModalFlag" @changeFlag="closeModal" :modalFlag="delModalFlag">
+    <p slot="message">
+      <span>是否删除商品？</span>
+    </p>
+    <div slot="btnGroup">
+      <a class="btn btn--m" href="javascript: void(0);" @click="removePro()">确认</a>
+      <a class="btn btn--m btn--red" href="javascript: void(0);" @click="delModalFlag = false">取消</a>
+    </div>
+  </modal>
   </div>
 </template>
 <script>
@@ -141,7 +150,11 @@
 	export default {
 		data () {
 			return {
-				cartList: []
+        cartList: [],
+        delModalFlag: false,
+        selectProId: '',
+        selectAllFlag: false,
+        timer: null
 			}
 		},
 		mounted () {
@@ -153,16 +166,57 @@
 					this.cartList = res.data.result
 				})
 			},
-			removePro (id) {
+			removePro () {
 				this.$ajax.delete('/users/removePro', { params: {
-					productId: id
+					productId: this.selectProId
 				} }).then((res) => {
+          this.delModalFlag = false
 					if (res.data.status === '0') {
 						alert('delete success')
 						this.init()
 					}
 				})
-			}
+      },
+      selectAll () {
+        this.selectAllFlag = !this.selectAllFlag
+        this.cartList.forEach((item) => {
+          item.checked = this.selectAllFlag ? 1 : 0
+        })
+        this.$ajax.post('/users/selectAll', {
+          checked: this.selectAllFlag ? 1 : 0
+        }).then((res) => {
+          console.log(res.data)
+        })
+      },
+      editPro (item, flag) {
+        if (flag === 'add') {
+          item.productNum++
+        } else if (flag === 'suc') {
+          if (item.productNum > 1) {
+            item.productNum--
+          }
+        } else {
+          item.checked = item.checked === 1 ? 0 : 1
+        }
+        this.timer && clearTimeout(this.timer)
+        this.timer = setTimeout(() => {
+          this.$ajax.post('/users/editPro', {
+            productId: item.productId,
+            productNum: item.productNum,
+            checked: item.checked
+          }).then((res) => {
+            if (res.data.status === '0') {
+            }
+          })
+        }, 1000)
+      },
+      delProduct (id) {
+        this.selectProId = id
+        this.delModalFlag = true
+      },
+      closeModal () {
+          this.delModalFlag = false
+      }
 		},
 		components: {
 			NavHeader,
