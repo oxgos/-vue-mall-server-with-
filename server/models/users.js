@@ -13,7 +13,14 @@ var usersSchema = new mongoose.Schema({
         productNum: String,
         checked: Number
     }],
-    addressList: Array
+    addressList: [{
+        addressId: String,
+        userName: String,
+        streetName: String,
+        postCode: Number,
+        tel: String,
+        isDefault: Boolean
+    }]
 })
 
 var usersModel = mongoose.model('Users', usersSchema)

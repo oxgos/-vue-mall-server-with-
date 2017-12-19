@@ -77,7 +77,7 @@
                   </div>
                 </div>
                 <div class="cart-tab-2">
-                  <div class="item-price">{{ item.salePrice }}</div>
+                  <div class="item-price">{{ item.salePrice | currency }}</div>
                 </div>
                 <div class="cart-tab-3">
                   <div class="item-quantity">
@@ -91,7 +91,7 @@
                   </div>
                 </div>
                 <div class="cart-tab-4">
-                  <div class="item-price-total">{{ item.salePrice * item.productNum }}</div>
+                  <div class="item-price-total">{{ item.salePrice * item.productNum | currency }}</div>
                 </div>
                 <div class="cart-tab-5">
                   <div class="cart-item-opration">
@@ -120,10 +120,10 @@
             </div>
             <div class="cart-foot-r">
               <div class="item-total">
-                Item total: <span class="total-price">{{ totalPrice }}</span>
+                Item total: <span class="total-price">{{ totalPrice | currency }}</span>
               </div>
               <div class="btn-wrap">
-                <a class="btn btn--red">Checkout</a>
+                <a class="btn btn--red" :class="{'btn--dis':selectedCount === 0}" @click="checkout">Checkout</a>
               </div>
             </div>
           </div>
@@ -136,7 +136,7 @@
       <span>是否删除商品？</span>
     </p>
     <div slot="btnGroup">
-      <a class="btn btn--m" href="javascript: void(0);" @click="removePro()">确认</a>
+      <a class="btn btn--m" href="javascript: void(0);" @click="removePro">确认</a>
       <a class="btn btn--m btn--red" href="javascript: void(0);" @click="delModalFlag = false">取消</a>
     </div>
   </modal>
@@ -146,18 +146,19 @@
 	import NavHeader from '@/components/NavHeader'
 	import NavBread from '@/components/NavBread'
 	import NavFooter from '@/components/NavFooter'
-	import Modal from '@/components/commonModal'
+  import Modal from '@/components/commonModal'
+  import { currency } from '../util/currency'
 	export default {
 		data () {
 			return {
         cartList: [],
         delModalFlag: false,
         selectProId: '',
-        selectAllFlag: false,
         timer: null
 			}
     },
     computed: {
+      // 计算所有商品总价格
       totalPrice () {
         let totalPrice = 0
         this.cartList.forEach((item) => {
@@ -167,15 +168,19 @@
         })
         return totalPrice
       },
-      allSelect () {
+      // 计算被选中的个数
+      selectedCount () {
         let n = 0
         this.cartList.forEach((item) => {
           if (item.checked === 1) {
             n++
           }
         })
-        this.selectAllFlag = n === this.cartList.length
-        return this.selectAllFlag
+        return n
+      },
+      // 检查是否全选
+      allSelect () {
+        return this.selectedCount === this.cartList.length
       }
     },
 		mounted () {
@@ -187,6 +192,13 @@
 				this.$ajax.get('/users/cartList').then((res) => {
 					this.cartList = res.data.result
 				})
+      },
+      checkout () {
+        if (this.selectedCount > 0) {
+          this.$router.push({
+            path: '/address'
+          })
+        }
       },
       // 删除商品
 			removePro () {
@@ -202,14 +214,14 @@
       },
       // 全选功能
       selectAll () {
-        this.selectAllFlag = !this.selectAllFlag
+        let flag = !this.allSelect
         this.cartList.forEach((item) => {
-          item.checked = this.selectAllFlag ? 1 : 0
+          item.checked = flag ? 1 : 0
         })
         this.timer && clearTimeout(this.timer)
         this.timer = setTimeout(() => {
           this.$ajax.post('/users/selectAll', {
-            checked: this.selectAllFlag ? 1 : 0
+            checked: flag ? 1 : 0
           }).then((res) => {
           })
         }, 500)
@@ -247,7 +259,10 @@
       closeModal () {
           this.delModalFlag = false
       }
-		},
+    },
+    filters: {
+      currency: currency
+    },
 		components: {
 			NavHeader,
 			NavFooter,

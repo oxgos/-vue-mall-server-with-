@@ -132,6 +132,27 @@ router.get('/cartList', (req, res) => {
 router.post('/selectAll', (req, res) => {
     let userId = req.cookies.userId
     let checked = req.body.checked
+
+    /* 
+    可能mongosse还不支持mongodb 3.6的新特性，以后再尝试
+    User.update({ 'userId': userId }, { $set: { 'cartList.$[].checked': checked } }, { multi: true }, (err, doc) => {
+        if (err) {
+            res.json({
+                status: '1',
+                msg: err.message,
+                result: ''
+            })
+        } else {
+            if (doc) {
+                res.json({
+                    status: '0',
+                    msg: '',
+                    result: doc
+                })
+            }
+        }
+    }) */
+
     User.findOne({ 'userId': userId }, (err, user) => {
         if (err) {
             res.json({
@@ -249,14 +270,105 @@ router.delete('/removePro', (req, res) => {
                         } else {
                             res.json({
                                 status: '0',
-                                msg: 'delete done',
-                                result: ''
+                                msg: '',
+                                result: 'delete done'
                             })
                         }
                     })
                 }
             }
         }) */
+})
+
+// 地址列表
+router.get('/address', (req, res) => {
+    let userId = req.cookies.userId
+    User.findOne({ userId: userId }, (err, user) => {
+        if (err) {
+            res.json({
+                status: '1',
+                msg: err.message,
+                result: ''
+            })
+        } else {
+            res.json({
+                status: '0',
+                msg: '',
+                result: user.addressList
+            })
+        }
+    })
+})
+
+// 删除地址
+router.delete('/address/remove', (req, res) => {
+    let userId = req.cookies.userId
+    let addressId = req.query.addressId
+    User.update({ userId: userId }, {
+        $pull: {
+            addressList: {
+                addressId: addressId
+            }
+        }
+    }, (err, doc) => {
+        if (err) {
+            res.json({
+                status: '1',
+                msg: err.message,
+                result: ''
+            })
+        } else {
+            if (doc) {
+                res.json({
+                    status: '0',
+                    msg: '',
+                    result: 'delete done'
+                })
+            }
+        }
+    })
+})
+
+// 修改默认地址
+router.post('/address/setDefault', (req, res) => {
+    let userId = req.cookies.userId
+    let addressId = req.body.productId
+    User.findOne({ userId: userId }, (err, user) => {
+        if (err) {
+            res.json({
+                status: '1',
+                msg: err.message,
+                result: ''
+            })
+        } else {
+            if (user) {
+                user.addressList.forEach((item) => {
+                    if (item.addressId === addressId) {
+                        item.isDefault = true
+                    } else {
+                        item.isDefault = false
+                    }
+                })
+                user.save((err1, doc) => {
+                    if (err1) {
+                        res.json({
+                            status: '1',
+                            msg: err1.message,
+                            result: ''
+                        })
+                    } else {
+                        if (doc) {
+                            res.json({
+                                status: '0',
+                                msg: '',
+                                result: 'set done'
+                            })
+                        }
+                    }
+                })
+            }
+        }
+    })
 })
 
 module.exports = router
