@@ -59,7 +59,7 @@
                 <div class="addr-list-wrap">
                     <div class="addr-list">
                         <ul>
-                            <li v-for="(addr, index) in limitAddr" :class="{'check': checkIndex === index}" @click="checkIndex = index">
+                            <li v-for="(addr, index) in limitAddr" :class="{'check': checkIndex === index}" @click="checkIndex = index; selectAddrId = addr.addressId">
                                 <dl>
                                     <dt>{{ addr.userName }}</dt>
                                     <dd class="address">{{ addr.streetName }}</dd>
@@ -86,7 +86,7 @@
                         </ul>
                     </div>
                     <div class="shipping-addr-more">
-                        <a class="addr-more-btn up-down-btn" :class="{'open': limit === addressList.length}" href="javascript: void(0);" @click="moreAddr">
+                        <a class="addr-more-btn up-down-btn" :class="{'open': limit > 3}" href="javascript: void(0);" @click="moreAddr">
                             more
                             <i class="i-up-down">
                             <i class="i-up-down-l"></i>
@@ -116,7 +116,7 @@
                     </div>
                 </div>
                 <div class="next-btn-wrap">
-                    <a class="btn btn--m btn--red">Next</a>
+                    <router-link :to="{path:'/orderConfirm', query: {'addressId': selectAddrId}}" class="btn btn--m btn--red">Next</router-link>
                 </div>
             </div>
         </div>
@@ -143,6 +143,7 @@
                 // 限制地址个数
                 limit: 3,
                 mdShow: false,
+                selectAddrId: '',
                 removeAddrId: '',
                 checkIndex: 0
             }
@@ -161,6 +162,12 @@
             init () {
                 this.$ajax.get('/users/address').then((res) => {
                     this.addressList = res.data.result
+                    this.addressList.forEach((item, index) => {
+                        if (item.isDefault) {
+                            this.checkIndex = index
+                            this.selectAddrId = item.addressId
+                        }
+                    })
                 })
             },
             // 显示更多地址
