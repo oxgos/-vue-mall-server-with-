@@ -111,7 +111,7 @@
             <div class="cart-foot-l">
               <div class="item-all-check">
                 <a href="javascipt: void(0);" @click="selectAll">
-                  <span class="checkbox-btn item-check-btn" :class="{check: selectAllFlag}">
+                  <span class="checkbox-btn item-check-btn" :class="{check: allSelect}">
                       <svg class="icon icon-ok"><use xlink:href="#icon-ok"/></svg>
                   </span>
                   <span>Select all</span>
@@ -120,7 +120,7 @@
             </div>
             <div class="cart-foot-r">
               <div class="item-total">
-                Item total: <span class="total-price">500</span>
+                Item total: <span class="total-price">{{ totalPrice }}</span>
               </div>
               <div class="btn-wrap">
                 <a class="btn btn--red">Checkout</a>
@@ -156,16 +156,39 @@
         selectAllFlag: false,
         timer: null
 			}
-		},
+    },
+    computed: {
+      totalPrice () {
+        let totalPrice = 0
+        this.cartList.forEach((item) => {
+          if (item.checked === 1) {
+            totalPrice += (parseFloat(item.salePrice) * parseInt(item.productNum))
+          }
+        })
+        return totalPrice
+      },
+      allSelect () {
+        let n = 0
+        this.cartList.forEach((item) => {
+          if (item.checked === 1) {
+            n++
+          }
+        })
+        this.selectAllFlag = n === this.cartList.length
+        return this.selectAllFlag
+      }
+    },
 		mounted () {
 			this.init()
 		},
 		methods: {
+      // 初始化页面
 			init () {
 				this.$ajax.get('/users/cartList').then((res) => {
 					this.cartList = res.data.result
 				})
-			},
+      },
+      // 删除商品
 			removePro () {
 				this.$ajax.delete('/users/removePro', { params: {
 					productId: this.selectProId
@@ -177,17 +200,21 @@
 					}
 				})
       },
+      // 全选功能
       selectAll () {
         this.selectAllFlag = !this.selectAllFlag
         this.cartList.forEach((item) => {
           item.checked = this.selectAllFlag ? 1 : 0
         })
-        this.$ajax.post('/users/selectAll', {
-          checked: this.selectAllFlag ? 1 : 0
-        }).then((res) => {
-          console.log(res.data)
-        })
+        this.timer && clearTimeout(this.timer)
+        this.timer = setTimeout(() => {
+          this.$ajax.post('/users/selectAll', {
+            checked: this.selectAllFlag ? 1 : 0
+          }).then((res) => {
+          })
+        }, 500)
       },
+      // 修改商品状态数量
       editPro (item, flag) {
         if (flag === 'add') {
           item.productNum++
@@ -198,6 +225,7 @@
         } else {
           item.checked = item.checked === 1 ? 0 : 1
         }
+        // 防止用户过快点击
         this.timer && clearTimeout(this.timer)
         this.timer = setTimeout(() => {
           this.$ajax.post('/users/editPro', {
@@ -208,12 +236,14 @@
             if (res.data.status === '0') {
             }
           })
-        }, 1000)
+        }, 500)
       },
+      // 获取删除商品id和询问模态框显示
       delProduct (id) {
         this.selectProId = id
         this.delModalFlag = true
       },
+      // 询问模态框关闭
       closeModal () {
           this.delModalFlag = false
       }

@@ -151,6 +151,7 @@
 					}
 				})
 			},
+			// 加购物车
 			addCart (id) {
 				this.$ajax.post('/goods/addCart', {
 					productId: id
@@ -163,6 +164,7 @@
 					}
 				})
 			},
+			// 滚动下拉加载商品数据
 			loadMore () {
 				this.busy = true
 				setTimeout(() => {
@@ -170,6 +172,7 @@
 					this.getGoodsList(true)
 				}, 1000)
 			},
+			// 商品价格升降排序
 			sortBy () {
 				this.sortFlag = !this.sortFlag
 				this.page = 1
@@ -179,6 +182,7 @@
 				this.filterBy = true
 				this.overLayFlag = true
 			},
+			// 价格筛选功能
 			setPriceFilter (index) {
 				this.priceChecked = index
 				this.page = 1
