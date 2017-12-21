@@ -58,7 +58,7 @@
                     </ul>
                 </div>
                 <ul class="cart-item-list">
-                    <li v-for="(product, index) in orderList" :key="index">
+                    <li v-for="(product, index) in goodsList" :key="index">
                         <div class="cart-tab-1">
                             <div class="cart-item-pic">
                                 <img :src="'/static/' + product.productImage"  alt="">
@@ -121,7 +121,7 @@
                 <router-link to="/address" class="btn btn--m">Previous</router-link>
                 </div>
                 <div class="next-btn-wrap">
-                <button class="btn btn--m btn--red">Proceed to payment</button>
+                <button class="btn btn--m btn--red" @click="payment">Proceed to payment</button>
                 </div>
             </div>
             </div>
@@ -138,7 +138,7 @@
     export default {
         data () {
             return {
-                orderList: [],
+                goodsList: [],
                 shipping: 100,
                 discount: 200,
                 tax: 100,
@@ -155,11 +155,23 @@
                     let cartList = res.data.result
                     cartList.forEach((item) => {
                         if (item.checked === 1) {
-                            this.orderList.push(item)
+                            this.goodsList.push(item)
                             this.subtotal += parseFloat(item.salePrice) * parseInt(item.productNum)
                             this.orderTotal = this.subtotal - this.shipping - this.discount - this.tax
                         }
                     })
+                })
+            },
+            payment () {
+                this.$ajax.post('/users/payment', {
+                    addressId: this.$route.query.addressId,
+                    orderTotal: this.orderTotal
+                }).then((res) => {
+                    if (res.data.status === '0') {
+                        this.$router.push({
+                            path: '/orderSuccess?orderId=' + res.data.result.orderId
+                        })
+                    }
                 })
             }
         },

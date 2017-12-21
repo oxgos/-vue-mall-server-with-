@@ -21,15 +21,15 @@
             <div class="order-create-main">
                 <h3>Congratulations! <br>Your order is under processing!</h3>
                 <p>
-                <span>Order ID：100000001</span>
-                <span>Order total：1000</span>
+                <span>Order ID：{{ orderId }}</span>
+                <span>Order total：{{ orderTotal | currency }}</span>
                 </p>
                 <div class="order-create-btn-wrap">
                 <div class="btn-l-wrap">
-                    <a href="javascript:;" class="btn btn--m">Cart List</a>
+                    <router-link to="/cart" href="javascript:;" class="btn btn--m">Cart List</router-link>
                 </div>
                 <div class="btn-r-wrap">
-                    <a href="javascript:;" class="btn btn--m">Goods List</a>
+                    <router-link to="/" href="javascript:;" class="btn btn--m">Goods List</router-link>
                 </div>
                 </div>
             </div>
@@ -42,12 +42,33 @@
 <script type="text/ecmascript-6">
     import NavHeader from '@/components/NavHeader'
 	import NavBread from '@/components/NavBread'
-	import NavFooter from '@/components/NavFooter'
+    import NavFooter from '@/components/NavFooter'
+    import { currency } from '../util/currency'
     export default {
         data () {
             return {
-
+                orderId: this.$route.query.orderId,
+                orderTotal: 0
             }
+        },
+        mounted () {
+            this.init()
+        },
+        methods: {
+            init () {
+                this.$ajax('/users/orderDetail', {
+                    params: {
+                        orderId: this.orderId
+                    }
+                }).then((res) => {
+                    if (res.data.status === '0') {
+                        this.orderTotal = res.data.result
+                    }
+                })
+            }
+        },
+        filters: {
+            currency: currency
         },
         components: {
             NavHeader,
@@ -58,5 +79,5 @@
 </script>
 
 <style scoped>
- 
+    @import './../assets/css/checkout.css';
 </style>
